@@ -114,7 +114,7 @@ small,.text-dim{color:var(--muted);}
 </head>
 <body>
 <div class="card" id="screen-login">
-  <h1>เกมความรู้การเงิน 💡</h1>
+  <h1>แฟนพันธ์แท้มิ่งขวัญ 💡</h1>
   <p class="mt-2 text-sm text-dim">กรอกข้อมูลเพื่อเริ่มเล่น</p>
   <div class="mt-6 space-y-3">
     <input id="nickname" class="input" placeholder="ชื่อเล่น">
@@ -131,9 +131,11 @@ small,.text-dim{color:var(--muted);}
   <div class="progress mb-4"><div id="bar"></div></div>
   <h2 id="qTitle" class="mb-3"></h2>
   <div id="options" class="space-y-2"></div>
+
+  <!-- สลับลำดับปุ่ม: ถัดไป อยู่ก่อน ย้อนกลับ -->
   <div class="mt-6 flex flex-col sm:flex-row gap-3">
-    <button id="prevBtn" class="btn btn-ghost flex-1">ย้อนกลับ</button>
     <button id="nextBtn" class="btn btn-primary flex-1">ถัดไป</button>
+    <button id="prevBtn" class="btn btn-ghost flex-1">ย้อนกลับ</button>
     <button id="submitBtn" class="btn btn-primary flex-1 hidden">ส่งคำตอบ</button>
   </div>
 </div>
@@ -194,7 +196,7 @@ function updateNav(){
 }
 $("startBtn").onclick=()=>{
  const n=$("nickname").value.trim(),e=$("empId").value.trim();
- if(n.length<2)return alert("กรุณากรอกชื่อเล่นให้ถูกต้อง");
+ if(n.length<1)return alert("กรุณากรอกชื่อเล่นให้ถูกต้อง");
  if(!EMP_ID_RULE.test(e))return alert("รหัสพนักงานไม่ถูกต้อง");
  state.nickname=n;state.empId=e;state.questions=buildQuestions();state.index=0;startTimer();show("screen-quiz");renderQuestion();
 };
