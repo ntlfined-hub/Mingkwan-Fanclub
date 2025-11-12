@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="theme-color" content="#0f172a"/>
+  <title>แฟนพันธ์แท้ มิ่งขวัญ</title>
+
+  <!-- Font: Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root{
+      --card:#ffffff; --line:#e5e7eb; --text:#0f172a; --muted:#64748b;
+      --accent:#6366f1; --cyan:#22d3ee; --shadow:0 30px 80px rgba(2,6,23,.10);
+    }
+    *{ box-sizing:border-box }
+    body{
+      font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+      font-size:16px; line-height:1.6;
+      color:var(--text); min-height:100vh; overflow-x:hidden;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(99,102,241,.16), transparent 60%),
+        radial-gradient(1000px 520px at 90% 0%, rgba(14,165,233,.18), transparent 60%),
+        radial-gradient(700px 420px at 40% 120%, rgba(34,211,238,.18), transparent 60%),
+        linear-gradient(180deg,#f7f9fc,#eef2f7 60%, #eef2f7);
+    }
+    h1,h2,h3{ letter-spacing:-0.01em }
+    .wrap{ position:relative; z-index:1 }
+    .glass{
+      background:linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.86));
+      border:1px solid rgba(229,231,235,.85); border-radius:20px;
+      box-shadow:var(--shadow); backdrop-filter: blur(8px);
+    }
+    .brand{
+      font-size:1.35rem; font-weight:800;
+      background:linear-gradient(90deg,#0ea5e9,#6366f1,#22d3ee);
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+    }
+
+    /* Buttons */
+    .btn{ display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border-radius:14px; padding:.9rem 1.1rem; font-weight:700; border:1px solid transparent; transition:transform .06s ease, box-shadow .2s ease, background .2s ease, filter .2s ease; font-size:1rem }
+    .btn:active{ transform:translateY(1px) }
+    .btn-primary{ background:#0f172a; color:#fff; box-shadow:0 10px 20px rgba(15,23,42,.18) }
+    .btn-primary:hover{ filter:brightness(1.08) }
+    .btn-accent{ background:linear-gradient(90deg,#6366f1,#818cf8); color:#fff; box-shadow:0 10px 30px rgba(99,102,241,.35) }
+    .btn-accent:hover{ filter:brightness(1.07) }
+    .btn-ghost{ background:#fff; border:1px solid var(--line); color:#111827 }
+    .btn[disabled]{ opacity:.55; cursor:not-allowed }
+
+    /* Options */
+    .option{ border:1.5px solid var(--line); border-radius:16px; padding:1rem 1.1rem; cursor:pointer; user-select:none; background:#fff; transition:border .15s ease, box-shadow .25s ease, transform .06s ease; outline:none; font-size:1rem; line-height:1.55 }
+    .option:hover{ box-shadow:0 18px 40px rgba(2,6,23,.08) }
+    .option.selected{ border-color:var(--accent); box-shadow:0 20px 48px rgba(99,102,241,.25) }
+    .option:focus-visible{ box-shadow:0 0 0 4px rgba(99,102,241,.25) }
+
+    /* Progress (แสดงเฉพาะช่วงทำข้อสอบ) */
+    #step-quiz .progress{ height:12px; background:#e5e7eb; border-radius:999px; overflow:hidden }
+    #step-quiz .progress>div{ height:100%; background:linear-gradient(90deg,#6366f1,#22d3ee); width:0%; transition:width .45s cubic-bezier(.22,.8,.22,1) }
+    .steps{ display:flex; gap:10px }
+    .dot{ width:10px; height:10px; border-radius:999px; background:#e5e7eb; transition:all .25s ease }
+    .dot.active{ background:#6366f1; box-shadow:0 0 0 6px rgba(99,102,241,.15) }
+
+    /* Toast */
+    .toast{ position:fixed; top:14px; right:14px; display:none; z-index:50 }
+    .toast.show{ display:block; animation:slidein .3s ease }
+    @keyframes slidein{ from{ transform:translateY(-8px); opacity:0 } to{ transform:translateY(0); opacity:1 } }
+
+    /* Confetti */
+    .confetti{ pointer-events:none; position:fixed; inset:0; overflow:hidden; z-index:40 }
+    .piece{ position:absolute; width:10px; height:14px; animation:fall 1.9s linear forwards; opacity:.95 }
+    @keyframes fall{ to{ transform:translateY(110vh) rotate(540deg) } }
+
+    /* Typography scale */
+    .title-lg{ font-size:1.7rem }           /* mobile */
+    @media (min-width:768px){ .title-lg{ font-size:2.2rem } }
+    .title-q{ font-size:1.25rem; font-weight:600; line-height:1.35 }
+
+    /* Gradient text utility + fallback */
+    .text-gradient{
+      background:linear-gradient(90deg,#0ea5e9,#6366f1,#22d3ee);
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+    }
+    @supports not ((background-clip: text) or (-webkit-background-clip: text)){
+      .text-gradient{ color:#0f172a; background:none }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .btn, .option, .toast.show{ transition:none }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap sticky top-0 z-20 backdrop-blur">
+    <div class="mx-auto max-w-3xl px-4 py-4 flex items-center justify-between">
+      <div class="brand">แฟนพันธ์แท้ มิ่งขวัญ</div>
+      <div class="flex items-center gap-2">
+        <span id="headerUser" class="hidden text-sm px-2.5 py-1 rounded-full bg-white/80 border border-slate-200">👤</span>
+        <span id="headerEmp"  class="hidden text-sm px-2.5 py-1 rounded-full bg-white/80 border border-slate-200">🆔</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap mx-auto max-w-3xl px-4 py-6">
+    <section class="glass p-6 md:p-8" aria-live="polite">
+      <!-- LOGIN -->
+      <div id="step-login" class="space-y-7" role="form" aria-labelledby="loginTitle">
+        <div>
+          <h1 id="loginTitle" class="title-lg font-extrabold leading-tight">ทบทวนความทรงจำรอบที่แล้วกัน</h1>
+          <p class="text-slate-600 mt-1">กรอกข้อมูลสั้น ๆ แล้วเริ่มเกมได้เลย</p>
+        </div>
+        <div class="grid gap-5">
+          <div>
+            <label for="nickname" class="block text-sm font-medium text-slate-700 mb-1">ชื่อเล่น</label>
+            <input id="nickname" type="text" inputmode="text" autocomplete="nickname"
+                   class="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500"
+                   placeholder="เช่น บีม, กาย" maxlength="30" />
+          </div>
+          <div>
+            <label for="empId" class="block text-sm font-medium text-slate-700 mb-1">รหัสพนักงาน</label>
+            <input id="empId" inputmode="latin" autocomplete="off"
+                   class="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500"
+                   placeholder="ตัวอักษร/ตัวเลข 4–16 ตัว (A–Z, a–z, 0–9)" maxlength="16" />
+            <p class="text-xs text-slate-500 mt-1">ข้อมูลนี้ใช้เพื่อสรุปผลและบันทึกลงระบบ</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="startBtn" class="btn btn-primary" type="button">เริ่มเกม</button>
+          <button id="demoBtn" class="btn btn-ghost" type="button">สุ่มตัวอย่าง</button>
+        </div>
+      </div>
+
+      <!-- QUIZ -->
+      <div id="step-quiz" class="hidden" role="group" aria-label="แบบทดสอบ">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="text-[1.4rem] font-extrabold leading-none" aria-live="polite"><span id="qIndex">1</span>/<span id="qTotal">5</span></div>
+            <div class="steps" id="stepDots" aria-hidden="true"></div>
+          </div>
+          <div class="text-sm text-slate-500">เวลา: <span id="timer">0:00</span></div>
+        </div>
+        <div class="progress mb-5"><div id="bar"></div></div>
+
+        <div id="qWrap" class="space-y-5">
+          <h2 id="qTitle" class="title-q"></h2>
+          <div id="options" class="grid gap-3" role="radiogroup" aria-labelledby="qTitle"></div>
+        </div>
+
+        <div class="mt-7 flex items-center justify-between">
+          <button id="prevBtn" class="btn btn-ghost" type="button">ย้อนกลับ</button>
+          <button id="nextBtn" class="btn btn-accent" type="button">ถัดไป</button>
+          <button id="submitBtn" class="btn btn-primary hidden" type="button">ส่งคำตอบ</button>
+        </div>
+      </div>
+
+      <!-- RESULT -->
+      <div id="step-result" class="hidden" role="region" aria-labelledby="resultTitle">
+        <div class="text-center">
+          <h2 id="resultTitle" class="title-lg font-extrabold mb-2 text-gradient">สรุปคะแนน</h2>
+          <p class="text-slate-600">เยี่ยมมาก! นี่คือผลลัพธ์ของคุณ</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-4 my-6">
+          <div class="glass p-4 text-center" aria-live="polite">
+            <div class="text-sm text-slate-600">คะแนน</div>
+            <div id="scoreText" class="text-[1.75rem] font-extrabold mt-1">0/0</div>
+          </div>
+          <div class="glass p-4 text-center" aria-live="polite">
+            <div class="text-sm text-slate-600">เปอร์เซ็นต์</div>
+            <div id="percentText" class="text-[1.75rem] font-extrabold mt-1">0%</div>
+          </div>
+          <div class="glass p-4 text-center" aria-live="polite">
+            <div class="text-sm text-slate-600">เวลา</div>
+            <div id="timeText" class="text-[1.75rem] font-extrabold mt-1">0:00</div>
+          </div>
+        </div>
+        <div class="mt-6 flex flex-wrap items-center gap-3">
+          <button id="playAgainBtn" class="btn btn-ghost" type="button">เริ่มใหม่</button>
+          <a id="shareBtn" class="btn btn-accent" href="#" target="_blank" rel="noopener">แชร์คะแนน</a>
+        </div>
+        <p class="text-xs text-slate-500 mt-6 text-center">FIN-JOD Experience • mobile-first • ultra-smooth</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="wrap toast" aria-live="assertive">
+    <div class="glass px-4 py-3 flex items-center gap-3">
+      <div class="w-2 h-2 rounded-full bg-red-500"></div>
+      <div id="toastMsg" class="text-sm">กรุณากรอกข้อมูลให้ครบถ้วน</div>
+    </div>
+  </div>
+
+  <!-- Confetti -->
+  <div id="confetti" class="confetti"></div>
+
+  <script>
+  // ===== CONFIG =====
+  const QUIZ_ID = "fin-ed-quiz-001";
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwqRg7I3M2OsNyzgfexr9IUyosCSXYAdjdHDAic4mQk8Opvv0_4G2Y7elVg3RRjing_7g/exec";
+  const EMP_ID_RULE = /^[A-Za-z0-9]{4,16}$/;
+
+  const BANK = [
+    { title: "รอบที่แล้ว เรามาให้ความรู้เรื่องการเงิน เดือนอะไร", options: ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน"], correctIndex: 2 },
+    { title: "พี่ขวัญเริ่มต้นทำงานที่เงินติดล้อด้วยหน้าอะไร", options: ["พนักงานส่งเอกสาร","หน่วย M","รปภ","พนักงานสาขา"], correctIndex: 0 },
+    { title: "พี่ขวัญมีลูกทั้งหมดกี่คน", options: ["1 คน","2 คน","3 คน","4 คน"], correctIndex: 1 },
+    { title: "จากสถานการณ์เงินไม่พอใช้ พี่ขวัญตัดสินใจขายอะไรเป็นอย่างแรกเพื่อให้ชีวิตไปต่อได้", options: ["บ้าน","รถ","ทอง","ทีวี"], correctIndex: 0 },
+    { title: "ในอดีต เมื่อการเงินติดลบ พี่ขวัญเลือกที่จะแก้ปัญหาอย่างไร", options: ["กดบัตรเครดิต","อดข้าว","ยืมเพื่อน","ลดรายจ่ายที่ไม่จำเป็น"], correctIndex: 0 },
+  ];
+
+  const state = { nickname:"", empId:"", index:0, questions:[], startTs:0, timerHandle:null, submitted:false, navigating:false };
+
+  const $ = id => document.getElementById(id);
+  const stepLogin=$('step-login'), stepQuiz=$('step-quiz'), stepResult=$('step-result');
+  const startBtn=$('startBtn'), demoBtn=$('demoBtn'), prevBtn=$('prevBtn'), nextBtn=$('nextBtn'), submitBtn=$('submitBtn');
+  const qIndex=$('qIndex'), qTotal=$('qTotal'), qTitle=$('qTitle'), options=$('options'), bar=$('bar'), stepDots=$('stepDots');
+  const timerSpan=$('timer'), scoreText=$('scoreText'), percentText=$('percentText'), timeText=$('timeText');
+  const headerUser=$('headerUser'), headerEmp=$('headerEmp'), toast=$('toast'), toastMsg=$('toastMsg'), confettiBox=$('confetti');
+
+  const mmss = ms => { const s=Math.floor(ms/1000), m=Math.floor(s/60), r=s%60; return `${m}:${String(r).padStart(2,'0')}`; };
+  function showToast(msg){ toastMsg.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 2200); }
+  function startTimer(){ stopTimer(); state.startTs=Date.now(); state.timerHandle=setInterval(()=>timerSpan.textContent=mmss(Date.now()-state.startTs), 500); }
+  function stopTimer(){ if(state.timerHandle){ clearInterval(state.timerHandle); state.timerHandle=null; } }
+  function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+  function focusOption(index=0){ const node = options.children[index]; if(node) node.focus({preventScroll:true}); }
+
+  function buildRandomizedQuestions(){
+    const picked = shuffle(BANK);
+    return picked.map(q=>{
+      const choices = q.options.map((t,i)=>({ text:t, isCorrect:i===q.correctIndex }));
+      return { title:q.title, choices:shuffle(choices), answerIndex:null };
+    });
+  }
+
+  function renderDots(){
+    stepDots.innerHTML = "";
+    for(let i=0;i<state.questions.length;i++){
+      const d=document.createElement('div'); d.className='dot'+(i<=state.index?' active':'');
+      stepDots.appendChild(d);
+    }
+  }
+
+  function setProgress(){
+    const pct = (state.index)/state.questions.length*100;
+    bar.style.width = pct+"%";
+    qIndex.textContent = Math.min(state.index+1, state.questions.length);
+    qTotal.textContent = state.questions.length;
+    renderDots();
+  }
+
+  function renderQuestion(){
+    const q = state.questions[state.index];
+    qTitle.textContent = q.title;
+    options.innerHTML = "";
+    q.choices.forEach((c,i)=>{
+      const div = document.createElement('div');
+      div.className = "option";
+      div.tabIndex = 0;
+      div.setAttribute('role','radio');
+      div.setAttribute('aria-checked', q.answerIndex===i ? 'true':'false');
+      div.textContent = c.text;
+      if(q.answerIndex===i) div.classList.add('selected');
+
+      const select = ()=>{
+        q.answerIndex = i;
+        [...options.children].forEach((el,idx)=>{
+          el.classList.toggle('selected', idx===i);
+          el.setAttribute('aria-checked', idx===i ? 'true':'false');
+        });
+        updateNavButtons();
+      };
+
+      div.addEventListener('click', select);
+      div.addEventListener('keydown', e=>{
+        if(e.key==='Enter' || e.key===' '){ e.preventDefault(); select(); }
+        if(e.key==='ArrowDown' || e.key==='ArrowRight'){ e.preventDefault(); focusOption(Math.min(i+1, options.children.length-1)); }
+        if(e.key==='ArrowUp' || e.key==='ArrowLeft'){ e.preventDefault(); focusOption(Math.max(i-1, 0)); }
+      });
+
+      options.appendChild(div);
+    });
+    updateNavButtons();
+    const firstSelected = q.answerIndex!==null ? q.answerIndex : 0;
+    setTimeout(()=>focusOption(firstSelected), 0);
+  }
+
+  function updateNavButtons(){
+    const first = state.index===0;
+    const last  = state.index===state.questions.length-1;
+    const answered = state.questions[state.index].answerIndex !== null;
+    prevBtn.classList.toggle('hidden', first);
+    nextBtn.classList.toggle('hidden', last);
+    nextBtn.disabled = last || !answered;
+    submitBtn.classList.toggle('hidden', !last);
+    submitBtn.disabled = !last || !answered;
+  }
+
+  function go(index){
+    if(state.navigating) return;
+    state.navigating = true;
+    state.index = Math.max(0, Math.min(index, state.questions.length-1));
+    setProgress(); renderQuestion();
+    state.navigating = false;
+  }
+
+  function validateLogin(){
+    const nickname = $('nickname').value.trim();
+    const empId = $('empId').value.trim();
+    if(nickname.length < 2){ showToast("กรุณากรอกชื่อเล่นอย่างน้อย 2 ตัวอักษร"); $('nickname').focus(); return null; }
+    if(!EMP_ID_RULE.test(empId)){ showToast("รหัสพนักงานต้องเป็นตัวอักษร/ตัวเลข 4–16 ตัว"); $('empId').focus(); return null; }
+    return { nickname, empId };
+  }
+
+  function loginToQuiz(){
+    stepLogin.classList.add('hidden');
+    stepQuiz.classList.remove('hidden');
+    headerUser.textContent = "👤 " + state.nickname;
+    headerEmp.textContent  = "🆔 " + state.empId;
+    headerUser.classList.remove('hidden'); headerEmp.classList.remove('hidden');
+
+    state.questions = buildRandomizedQuestions();
+    state.index = 0;
+
+    setProgress(); renderQuestion(); startTimer();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function sprinkleConfetti(){
+    confettiBox.innerHTML = "";
+    const colors = ["#6366f1","#10b981","#f59e0b","#ef4444","#14b8a6","#a78bfa"];
+    for(let i=0;i<80;i++){
+      const p=document.createElement('div');
+      p.className="piece";
+      p.style.left = (Math.random()*100) + "vw";
+      p.style.top  = (-10 - Math.random()*20) + "vh";
+      p.style.background = colors[(Math.random()*colors.length)|0];
+      p.style.transform = `translateY(0) rotate(${Math.random()*360}deg)`;
+      p.style.animationDelay = (Math.random()*0.6)+"s";
+      confettiBox.appendChild(p);
+    }
+    setTimeout(()=>{ confettiBox.innerHTML=""; }, 2600);
+  }
+
+  // ส่งผลไป GAS แบบ fire-and-forget
+  async function postResultSilently(payloadObj){
+    const form = new URLSearchParams();
+    Object.entries(payloadObj).forEach(([k,v])=> form.set(k, String(v)));
+    try{
+      if (navigator.sendBeacon){
+        const blob = new Blob([form.toString()], {type:'application/x-www-form-urlencoded;charset=UTF-8'});
+        const ok = navigator.sendBeacon(GAS_WEB_APP_URL, blob);
+        if (ok) return true;
+      }
+    }catch(e){ console.warn('sendBeacon failed', e); }
+    try{
+      await fetch(GAS_WEB_APP_URL, { method:'POST', body: form, mode:'no-cors' });
+      return true;
+    }catch(e){ console.warn('no-cors fetch failed', e); return false; }
+  }
+
+  async function submitQuiz(){
+    if(state.submitted) return;
+    submitBtn.disabled = true;
+
+    const spentMs = Date.now() - state.startTs;
+    const score = state.questions.reduce((s,q)=>{
+      const i=q.answerIndex; return s + (i!==null && q.choices[i].isCorrect ? 1 : 0);
+    },0);
+    const total=state.questions.length;
+    const percent=Math.round(score/total*100);
+
+    stopTimer();
+    stepQuiz.classList.add('hidden');
+    stepResult.classList.remove('hidden');
+    scoreText.textContent = `${score}/${total}`;
+    percentText.textContent = `${percent}%`;
+    timeText.textContent = mmss(spentMs);
+    sprinkleConfetti();
+
+    const shareText = encodeURIComponent(`ฉันทำแบบทดสอบได้ ${score}/${total} (${percent}%) ในเวลา ${mmss(spentMs)} 🎉`);
+    $('shareBtn').href = `https://line.me/R/msg/text/?${shareText}`;
+
+    const payload = { quizId: QUIZ_ID, nickname: state.nickname, empId: state.empId, score, total, percent, spentMs, userAgent: navigator.userAgent };
+    postResultSilently(payload).then(ok=>{ if(!ok) console.warn('send result fallback failed'); });
+
+    state.submitted = true;
+  }
+
+  function resetToLogin(){
+    stopTimer(); confettiBox.innerHTML = "";
+    state.nickname=""; state.empId=""; state.index=0; state.questions=[]; state.startTs=0; state.submitted=false;
+    $('nickname').value=""; $('empId').value="";
+    headerUser.classList.add('hidden'); headerEmp.classList.add('hidden');
+    headerUser.textContent=""; headerEmp.textContent="";
+    timerSpan.textContent="0:00"; qIndex.textContent="1"; qTotal.textContent=BANK.length;
+    bar.style.width="0%"; options.innerHTML=""; qTitle.textContent=""; stepDots.innerHTML="";
+    stepResult.classList.add('hidden'); stepQuiz.classList.add('hidden'); stepLogin.classList.remove('hidden');
+    $('nickname').focus();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // EVENTS
+  startBtn.addEventListener('click', ()=>{ const v=validateLogin(); if(!v) return; state.nickname=v.nickname; state.empId=v.empId; loginToQuiz(); });
+  demoBtn.addEventListener('click', ()=>{ $('nickname').value="บีม"; $('empId').value="AB12"; $('nickname').focus(); });
+  prevBtn.addEventListener('click', ()=> go(state.index-1));
+  nextBtn.addEventListener('click', ()=> go(state.index+1));
+  submitBtn.addEventListener('click', submitQuiz);
+  $('playAgainBtn')?.addEventListener('click', resetToLogin);
+
+  document.addEventListener('keydown', (e)=>{
+    if(stepQuiz.classList.contains('hidden')) return;
+    if(e.key==='Enter'){
+      const last  = state.index===state.questions.length-1;
+      const answered = state.questions[state.index].answerIndex!==null;
+      if(!answered) return;
+      if(last) submitQuiz(); else go(state.index+1);
+    }
+  });
+
+  // init
+  qTotal.textContent = BANK.length;
+  $('nickname').setAttribute('autocapitalize','off');
+  </script>
+</body>
+</html>
